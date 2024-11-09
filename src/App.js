@@ -3,7 +3,7 @@ import { useState } from "react";
 const initialItems = [
   { id: 1, description: "Passports", quantity: 2, packed: false },
   { id: 2, description: "Socks", quantity: 12, packed: false },
-  { id: 3, description: "Book", quantity: 1, packed: true },
+  { id: 3, description: "Book", quantity: 1, packed: false },
 ];
 
 export default function App() {
@@ -15,11 +15,22 @@ export default function App() {
   function deleteHandler(id) {
     setItem((items) => items.filter((item) => item.id !== id));
   }
+  function toggleHandler(id) {
+    setItem((items) =>
+      items.map((item) =>
+        item.id === id ? { ...item, packed: !item.packed } : item
+      )
+    );
+  }
   return (
     <div className="app">
       <Logo />
       <Form onAddItems={handleAddItems} />
-      <PackingList items={item} onDeleteHandler={deleteHandler} />
+      <PackingList
+        items={item}
+        onDeleteHandler={deleteHandler}
+        onToggleHandler={toggleHandler}
+      />
       <Stats />
     </div>
   );
@@ -68,23 +79,35 @@ function Form({ onAddItems }) {
     </form>
   );
 }
-function PackingList({ items, onDeleteHandler }) {
+function PackingList({ items, onDeleteHandler, onToggleHandler }) {
   return (
     <div className="list">
       <ul>
         {items.map((item) => (
-          <Item item={item} key={item.id} deleteHandler={onDeleteHandler} />
+          <Item
+            item={item}
+            key={item.id}
+            onDeleteHandler={onDeleteHandler}
+            onToggleHandler={onToggleHandler}
+          />
         ))}
       </ul>
     </div>
   );
 }
-function Item({ item, deleteHandler }) {
+function Item({ item, onDeleteHandler, onToggleHandler }) {
   return (
     <li>
+      <input
+        type="checkbox"
+        value={item.packed}
+        onClick={() => {
+          onToggleHandler(item.id);
+        }}
+      />
       <span style={item.packed ? { textDecoration: "line-through" } : {}}>
         {item.quantity} {item.description}
-        <button onClick={() => deleteHandler(item.id)}>❌</button>
+        <button onClick={() => onDeleteHandler(item.id)}>❌</button>
       </span>
     </li>
   );

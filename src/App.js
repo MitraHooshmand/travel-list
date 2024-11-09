@@ -7,11 +7,19 @@ const initialItems = [
 ];
 
 export default function App() {
+  const [item, setItem] = useState(initialItems);
+
+  function handleAddItems(item) {
+    setItem((items) => [...items, item]);
+  }
+  function deleteHandler(id) {
+    setItem((items) => items.filter((item) => item.id !== id));
+  }
   return (
     <div className="app">
       <Logo />
-      <Form />
-      <PackingList />
+      <Form onAddItems={handleAddItems} />
+      <PackingList items={item} onDeleteHandler={deleteHandler} />
       <Stats />
     </div>
   );
@@ -20,15 +28,17 @@ export default function App() {
 function Logo() {
   return <h1> Far Away🌴🌊</h1>;
 }
-function Form() {
+function Form({ onAddItems }) {
   const [description, setDescription] = useState("");
   const [quantity, setQuantity] = useState(1);
+
   function handleSubmit(e) {
     e.preventDefault();
     if (!description) return;
 
     const newItem = { description, quantity, packed: false, id: Date.now() };
     console.log(newItem);
+    onAddItems(newItem);
     setQuantity(1);
     setDescription("");
   }
@@ -36,7 +46,7 @@ function Form() {
     <form className="add-form" onSubmit={handleSubmit}>
       <h3>What you need for your trip?</h3>
       <select
-        selectedIndex={quantity}
+        value={quantity}
         onChange={(e) => {
           setQuantity(Number(e.target.value));
         }}
@@ -58,23 +68,23 @@ function Form() {
     </form>
   );
 }
-function PackingList() {
+function PackingList({ items, onDeleteHandler }) {
   return (
     <div className="list">
       <ul>
-        {initialItems.map((item) => (
-          <Item item={item} key={item.id} />
+        {items.map((item) => (
+          <Item item={item} key={item.id} deleteHandler={onDeleteHandler} />
         ))}
       </ul>
     </div>
   );
 }
-function Item({ item }) {
+function Item({ item, deleteHandler }) {
   return (
     <li>
       <span style={item.packed ? { textDecoration: "line-through" } : {}}>
         {item.quantity} {item.description}
-        <button>❌</button>
+        <button onClick={() => deleteHandler(item.id)}>❌</button>
       </span>
     </li>
   );

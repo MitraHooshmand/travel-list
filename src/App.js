@@ -31,7 +31,7 @@ export default function App() {
         onDeleteHandler={deleteHandler}
         onToggleHandler={toggleHandler}
       />
-      <Stats />
+      <Stats item={item} />
     </div>
   );
 }
@@ -80,10 +80,22 @@ function Form({ onAddItems }) {
   );
 }
 function PackingList({ items, onDeleteHandler, onToggleHandler }) {
+  const [sortBy, SetSortBy] = useState("input");
+  let sortCriteria;
+  if (sortBy === "input") sortCriteria = items;
+  if (sortBy === "description")
+    sortCriteria = items
+      .slice()
+      .sort((a, b) => a.description.localeCompare(b.description));
+
+  if (sortBy === "packed")
+    sortCriteria = items
+      .slice()
+      .sort((a, b) => Number(a.packed) - Number(b.packed));
   return (
     <div className="list">
       <ul>
-        {items.map((item) => (
+        {sortCriteria.map((item) => (
           <Item
             item={item}
             key={item.id}
@@ -92,6 +104,11 @@ function PackingList({ items, onDeleteHandler, onToggleHandler }) {
           />
         ))}
       </ul>
+      <select value={sortBy} onChange={(e) => SetSortBy(e.target.value)}>
+        <option value="input">Sorted by input order</option>
+        <option value="description">Sorted by description</option>
+        <option value="packed">Sorted by packed status</option>
+      </select>
     </div>
   );
 }
@@ -112,10 +129,19 @@ function Item({ item, onDeleteHandler, onToggleHandler }) {
     </li>
   );
 }
-function Stats() {
+function Stats({ item }) {
+  const numPacked = item.filter((item) => item.packed).length;
+
   return (
     <footer className="stats">
-      <em>you have X items in your list</em>
+      {numPacked === item.length ? (
+        <em>Ready to go! 🛫</em>
+      ) : (
+        <em>
+          you have {item.length} items in your list, and you already packed {""}
+          {numPacked} ({Math.round((numPacked / item.length) * 100)}%)
+        </em>
+      )}
     </footer>
   );
 }
